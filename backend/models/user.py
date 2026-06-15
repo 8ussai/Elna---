@@ -20,6 +20,7 @@ class User(Base):
     
     last_username_change = Column(DateTime(timezone=True), default=func.now())
     created_at = Column(DateTime(timezone=True), default=func.now())
+    updated_at = Column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
 
     posts = relationship("Post", back_populates="author")
     voted_posts = relationship("PostVote", back_populates="voter")

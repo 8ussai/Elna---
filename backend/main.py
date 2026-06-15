@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from backend.database import engine, Base
 from backend.models import user, post, course
-from backend.routes import auth, posts
+from backend.routes import auth, posts, courses
 
 app = FastAPI(
     title="Elna API",
@@ -23,6 +23,7 @@ Base.metadata.create_all(bind=engine)
 
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(posts.router, prefix="/posts", tags=["Posts"])
+app.include_router(courses.router, prefix="/courses", tags=["Courses & Study Workspace"])
 
 @app.get("/health", tags=["Health"])
 def health_check():
