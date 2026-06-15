@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 
 from backend.database import engine
-from backend.models import user as models
-from backend.routes import auth
+from backend.models import user, post
+from backend.routes import auth, posts
 
 app = FastAPI(
     title="Elna API",
@@ -11,13 +11,21 @@ app = FastAPI(
 )
 
 
-models.Base.metadata.create_all(bind=engine)
+user.Base.metadata.create_all(bind=engine)
+post.Base.metadata.create_all(bind=engine)
 
 
 app.include_router(
     auth.router,
     prefix="/auth",
     tags=["Authentication"],
+)
+
+ 
+app.include_router(
+    posts.router,
+    prefix="/posts",
+    tags=["Posts"],
 )
 
 
