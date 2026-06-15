@@ -17,6 +17,7 @@ class Post(Base):
     major = Column(String, nullable=False, index=True)
 
     created_at = Column(DateTime(timezone=True), default=func.now())
+    updated_at = Column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
 
     author = relationship("User", back_populates="posts")
     votes = relationship("PostVote", back_populates="post", cascade="all, delete-orphan")

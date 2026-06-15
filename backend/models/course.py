@@ -12,6 +12,7 @@ class Course(Base):
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), default=func.now())
+    updated_at = Column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
 
     owner = relationship("User", back_populates="courses")
     materials = relationship("CourseMaterial", back_populates="course", cascade="all, delete-orphan")
@@ -30,6 +31,7 @@ class CourseMaterial(Base):
     
     is_rag_indexed = Column(Boolean, default=False) 
     created_at = Column(DateTime(timezone=True), default=func.now())
+    updated_at = Column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
 
     course = relationship("Course", back_populates="materials")
 
@@ -40,9 +42,10 @@ class CourseNote(Base):
     id = Column(Integer, primary_key=True, index=True)
     course_id = Column(Integer, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False, index=True)
     
-    title = Column(String, nullable=True) # عنوان اختياري للملاحظة
+    title = Column(String, nullable=True)
     content = Column(Text, nullable=False)
     created_at = Column(DateTime(timezone=True), default=func.now())
+    updated_at = Column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
 
     course = relationship("Course", back_populates="notes")
 
@@ -55,5 +58,8 @@ class CourseLink(Base):
     
     title = Column(String, nullable=False)
     url = Column(String, nullable=False)
+    
+    created_at = Column(DateTime(timezone=True), default=func.now())
+    updated_at = Column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
 
     course = relationship("Course", back_populates="links")

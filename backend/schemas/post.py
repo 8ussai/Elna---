@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
+from pydantic import Field
 
 
 class PostBase(BaseModel):
@@ -15,6 +16,7 @@ class PostOut(PostBase):
     id: int
     user_id: int
     created_at: datetime
+    updated_at: datetime
     votes_count: int
 
     university: str
@@ -22,3 +24,7 @@ class PostOut(PostBase):
     major: str
 
     model_config = {"from_attributes": True}
+
+
+class PostVoteAction(BaseModel):
+    vote_dir: int = Field(..., description="1 for upvote, -1 for downvote")
