@@ -19,7 +19,6 @@ class UserCreate(UserBase):
 class UserOut(UserBase):
     id: int
     created_at: datetime
-    updated_at: datetime
     last_username_change: datetime
 
     model_config = ConfigDict(from_attributes=True)

@@ -29,6 +29,7 @@ def _map_to_post_out(post: Post, votes_count: int) -> PostOut:
         college=post.college,
         major=post.major,
         created_at=post.created_at,
+        updated_at=post.updated_at,
         votes_count=votes_count,
     )
 
