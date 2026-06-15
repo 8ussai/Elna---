@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from backend.database import Base
 
@@ -19,3 +20,6 @@ class User(Base):
     
     last_username_change = Column(DateTime(timezone=True), default=func.now())
     created_at = Column(DateTime(timezone=True), default=func.now())
+
+    posts = relationship("Post", back_populates="author")
+    voted_posts = relationship("PostVote", back_populates="voter")
