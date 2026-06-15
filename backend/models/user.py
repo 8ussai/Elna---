@@ -23,3 +23,5 @@ class User(Base):
 
     posts = relationship("Post", back_populates="author")
     voted_posts = relationship("PostVote", back_populates="voter")
+
+    courses = relationship("Course", back_populates="owner", cascade="all, delete-orphan")

@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 
-from backend.database import engine
-from backend.models import user, post
+from backend.database import engine, Base
+from backend.models import user, post, course
 from backend.routes import auth, posts
+
 
 app = FastAPI(
     title="Elna API",
@@ -10,10 +11,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
-
-user.Base.metadata.create_all(bind=engine)
-post.Base.metadata.create_all(bind=engine)
-
+Base.metadata.create_all(bind=engine)
 
 app.include_router(
     auth.router,
@@ -21,13 +19,11 @@ app.include_router(
     tags=["Authentication"],
 )
 
- 
 app.include_router(
     posts.router,
     prefix="/posts",
     tags=["Posts"],
 )
-
 
 @app.get("/health", tags=["Health"])
 def health_check():
