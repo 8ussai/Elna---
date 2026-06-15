@@ -1,9 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles 
 
 from backend.database import engine, Base
 from backend.models import user, post, course
 from backend.routes import auth, posts, courses
+
+from backend.backendConfig import UPLOAD_DIR 
+
 
 app = FastAPI(
     title="Elna API",
@@ -21,9 +25,14 @@ app.add_middleware(
 
 Base.metadata.create_all(bind=engine)
 
+
+app.mount("/files", StaticFiles(directory=UPLOAD_DIR), name="files")
+
+
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(posts.router, prefix="/posts", tags=["Posts"])
 app.include_router(courses.router, prefix="/courses", tags=["Courses & Study Workspace"])
+
 
 @app.get("/health", tags=["Health"])
 def health_check():

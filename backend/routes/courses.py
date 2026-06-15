@@ -1,10 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+
+import shutil
+import os
+import uuid
+
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List
 
 from backend.database import get_db
+from backend.backendConfig import ALLOWED_EXTENSIONS
 from backend.models.user import User
-from backend.models.course import Course, CourseNote, CourseLink
+from backend.models.course import Course, CourseNote, CourseLink, CourseMaterial
 from backend.schemas.course import (
     CourseCreate,
     CourseOut,
@@ -12,16 +18,12 @@ from backend.schemas.course import (
     CourseNoteOut,
     CourseLinkCreate,
     CourseLinkOut,
-    CourseMaterialOut
+    CourseMaterialOut,
+    CourseDetailOut
 )
 from backend.core.apiDependencies import get_current_user
 
 router = APIRouter()
-
-class CourseDetailOut(CourseOut):
-    materials: List[CourseMaterialOut]
-    notes: List[CourseNoteOut]
-    links: List[CourseLinkOut]
 
 
 @router.post("/", response_model=CourseOut, status_code=status.HTTP_201_CREATED)
@@ -145,5 +147,60 @@ def add_course_link(
     db.add(new_link)
     db.commit()
     db.refresh(new_link)
-    
+
     return new_link
+
+
+@router.post("/{course_id}/upload", response_model=CourseMaterialOut, status_code=status.HTTP_201_CREATED)
+def upload_course_material(
+    course_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    course = db.query(Course).filter(Course.id == course_id).first()
+    
+    if not course:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Course with id {course_id} not found."
+        )
+        
+    if course.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to modify this course."
+        )
+
+
+    file_extension = file.filename.split('.')[-1].lower() if "." in file.filename else ""
+
+    if file_extension not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"File extension '.{file_extension}' is not allowed."
+        )
+
+    unique_filename = f"{uuid.uuid4()}.{file_extension}"
+    file_path = f"uploads/courses/{unique_filename}"
+
+    try:
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Could not save file: {str(e)}"
+        )
+
+    new_material = CourseMaterial(
+        course_id=course_id,
+        file_name=file.filename,
+        file_path=file_path
+    )
+    
+    db.add(new_material)
+    db.commit()
+    db.refresh(new_material)
+
+    return new_material

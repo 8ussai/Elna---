@@ -1,4 +1,5 @@
 from fastapi.security import OAuth2PasswordBearer
+import os
 
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./elna.db"
@@ -8,3 +9,8 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+
+UPLOAD_DIR = "uploads/courses"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+ALLOWED_EXTENSIONS = {"pdf", "doc", "docx", "ppt", "pptx", "txt", "png", "jpg"}

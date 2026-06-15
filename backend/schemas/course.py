@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 class CourseBase(BaseModel):
     title: str
@@ -57,3 +57,8 @@ class CourseLinkOut(CourseLinkBase):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+class CourseDetailOut(CourseOut):
+    materials: List[CourseMaterialOut]
+    notes: List[CourseNoteOut]
+    links: List[CourseLinkOut]
