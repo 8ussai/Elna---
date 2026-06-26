@@ -1,4 +1,3 @@
-
 import shutil
 import os
 import uuid
@@ -6,6 +5,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List
+from fastapi import BackgroundTasks 
 
 from backend.database import get_db
 from backend.backendConfig import ALLOWED_EXTENSIONS
@@ -22,6 +22,7 @@ from backend.schemas.course import (
     CourseDetailOut
 )
 from backend.core.apiDependencies import get_current_user
+from backend.services.rag_pipeline import index_course_material
 
 router = APIRouter()
 
@@ -154,6 +155,7 @@ def add_course_link(
 @router.post("/{course_id}/upload", response_model=CourseMaterialOut, status_code=status.HTTP_201_CREATED)
 def upload_course_material(
     course_id: int,
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -171,7 +173,6 @@ def upload_course_material(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to modify this course."
         )
-
 
     file_extension = file.filename.split('.')[-1].lower() if "." in file.filename else ""
 
@@ -202,5 +203,13 @@ def upload_course_material(
     db.add(new_material)
     db.commit()
     db.refresh(new_material)
+
+    
+    background_tasks.add_task(
+        index_course_material,
+        file_path=file_path,
+        material_id=new_material.id,
+        course_id=course_id
+    )
 
     return new_material

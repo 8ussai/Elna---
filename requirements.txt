@@ -8,3 +8,12 @@ python-multipart
 email-validator
 python-jose[cryptography]
 python-dotenv
+
+langchain
+langchain-community
+langchain-huggingface
+chromadb
+sentence-transformers
+pymupdf
+unstructured
+python-pptx

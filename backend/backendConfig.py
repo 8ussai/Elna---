@@ -6,11 +6,14 @@ SQLALCHEMY_DATABASE_URL = "sqlite:///./elna.db"
 
 SECRET_KEY = "DEVELOPMENT_TEST_KEY" 
 ALGORITHM = "HS256"               
-ACCESS_TOKEN_EXPIRE_MINUTES = 30  
+ACCESS_TOKEN_EXPIRE_MINUTES = 10080
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 UPLOAD_DIR = "uploads/courses"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-ALLOWED_EXTENSIONS = {"pdf", "doc", "docx", "ppt", "pptx", "txt", "png", "jpg"}
+CHROMA_DB_DIR = "chroma_db"
+os.makedirs(CHROMA_DB_DIR, exist_ok=True)
+
+ALLOWED_EXTENSIONS = {"pdf", "ppt", "pptx"}
