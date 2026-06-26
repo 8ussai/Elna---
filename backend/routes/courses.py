@@ -23,6 +23,7 @@ from backend.schemas.course import (
 )
 from backend.core.apiDependencies import get_current_user
 from backend.services.rag_pipeline import index_course_material
+from backend.services.quiz_generator import generate_quiz_from_material
 
 router = APIRouter()
 
@@ -213,3 +214,33 @@ def upload_course_material(
     )
 
     return new_material
+
+@router.get("/{course_id}/materials/{material_id}/quiz")
+def generate_ai_quiz(
+    course_id: int,
+    material_id: int,
+    num_questions: int = 5,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course or course.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied.")
+
+    material = db.query(CourseMaterial).filter(
+        CourseMaterial.id == material_id, 
+        CourseMaterial.course_id == course_id
+    ).first()
+    
+    if not material:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Material not found.")
+
+    quiz_result = generate_quiz_from_material(material_id, num_questions)
+    
+    if isinstance(quiz_result, dict) and "error" in quiz_result:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            detail=quiz_result["error"]
+        )
+
+    return quiz_result
